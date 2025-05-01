@@ -14,3 +14,4 @@ streamlit
 scikit-learn
 seaborn
 pmdarima
+plotly
