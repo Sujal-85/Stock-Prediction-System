@@ -12,7 +12,7 @@ from sklearn.metrics import confusion_matrix
 from statsmodels.tsa.arima.model import ARIMA
 from prophet import Prophet
 from statsmodels.tsa.stattools import adfuller
-# from pmdarima import auto_arima
+from pmdarima import auto_arima
 import matplotlib.pyplot as plt
 import streamlit as st
 import streamlit.components.v1 as components
