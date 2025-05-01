@@ -12,7 +12,7 @@ from sklearn.metrics import confusion_matrix
 from statsmodels.tsa.arima.model import ARIMA
 from prophet import Prophet
 from statsmodels.tsa.stattools import adfuller
-# from pmdarima import auto_arima
+from pmdarima import auto_arima
 import matplotlib.pyplot as plt
 import streamlit as st
 import streamlit.components.v1 as components
@@ -852,8 +852,17 @@ try:
             actual_direction = np.sign(np.diff(y_test_rescaled.flatten()))
             pred_direction = np.sign(np.diff(model_performance["Linear Regression"]["Predictions"].flatten()))
             
+            # Filter out zeros (flat periods) to make it binary classification (up/down)
+            mask = (actual_direction != 0) & (pred_direction != 0)
+            actual_direction = actual_direction[mask]
+            pred_direction = pred_direction[mask]
+            
+            # Convert to binary (1=up, 0=down)
+            actual_binary = (actual_direction > 0).astype(int)
+            pred_binary = (pred_direction > 0).astype(int)
+            
             # Create confusion matrix
-            cm = confusion_matrix(actual_direction, pred_direction)
+            cm = confusion_matrix(actual_binary, pred_binary)
 
             # Create a smaller figure with adjusted parameters
             fig_cm = plt.figure(figsize=(3, 2), dpi=100)  # Smaller figure size (3x2 inches)
@@ -877,9 +886,9 @@ try:
             st.pyplot(fig_cm)
             
             # Calculate metrics
-            total_predictions = len(actual_direction)
-            correct_predictions = np.sum(actual_direction == pred_direction)
-            direction_accuracy = correct_predictions / total_predictions
+            total_predictions = len(actual_binary)
+            correct_predictions = np.sum(actual_binary == pred_binary)
+            direction_accuracy = correct_predictions / total_predictions if total_predictions > 0 else 0
             
             st.markdown(f"""
             <div class="model-card" style="margin-top: 20px;">
@@ -887,6 +896,9 @@ try:
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                     <div class="metric-box">
                         <b>Overall Direction Accuracy:</b> {direction_accuracy:.1%}
+                    </div>
+                    <div class="metric-box">
+                        <b>Total Predictions:</b> {total_predictions}
                     </div>
                 </div>
                 <p style="font-size: 0.9em; margin-top: 10px;">
