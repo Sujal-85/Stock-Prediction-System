@@ -23,7 +23,7 @@ import hashlib
 import pickle
 import time
 from keras import backend as K
-from pmdarima import auto_arima
+# from pmdarima import auto_arima
 
 # Create directories for saving models and scalers if they don't exist
 os.makedirs('models', exist_ok=True)
